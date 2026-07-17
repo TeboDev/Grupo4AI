@@ -150,7 +150,7 @@ try:
     plt.ylabel('True Positive Rate')
     plt.title('Receiver Operating Characteristic')
     plt.legend(loc="lower right")
-    plt.show()
+    # plt.show()
 except ValueError:
     print("AUC: No se puede calcular (solo una clase en y_test o y_pred)")
 
@@ -175,7 +175,7 @@ plot_tree(model,
           ax=ax)
 plt.title('Árbol de Decisión - Predicción de Hipoglucemia en Diabetes')
 # Mostrar la gráfica
-plt.show()
+# plt.show()
 
 # Calcular y visualizar la importancia de las variables en la predicción del modelo
 importances = model.feature_importances_
@@ -195,7 +195,7 @@ plt.xlabel('Importancia')
 plt.ylabel('Variables')
 plt.title('Importancia de las variables - Decision Tree Diabetes')
 plt.gca().invert_yaxis()
-plt.show()
+# plt.show()
 
 # Guardar el modelo a un archivo
 import joblib
