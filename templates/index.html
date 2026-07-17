@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Predicción de Riesgo de Hipoglucemia usando IA para pacientes con Diabetes">
+    <title>Diabetes AI - Predicción de Hipoglucemia</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a; /* Slate 900 */
+            --glass-bg: rgba(30, 41, 59, 0.7); /* Slate 800 with opacity */
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --danger-color: #ef4444;
+            --success-color: #10b981;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .form-section {
+            background: rgba(15, 23, 42, 0.4);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        input[type="number"]:focus, select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        input[type="number"]:hover, select:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        select option {
+            background-color: var(--bg-color);
+            color: white;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary-gradient);
+            color: white;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1rem;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .result-card {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--glass-border);
+        }
+
+        .result-card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .result-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        
+        .result-danger h3 {
+            color: #fca5a5;
+        }
+
+        .result-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .result-success h3 {
+            color: #6ee7b7;
+        }
+        
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger-color);
+            padding: 1rem;
+            border-radius: 4px 8px 8px 4px;
+            margin-bottom: 1.5rem;
+            color: #fca5a5;
+            font-size: 0.9rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 2rem;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- Left Side: Header & Info -->
+        <div class="header-section">
+            <h1>Diabetes AI Predictor</h1>
+            <p class="subtitle">
+                Selecciona un modelo de inteligencia artificial entrenado para analizar niveles de glucosa e insulina, y predecir el riesgo de un episodio de hipoglucemia.
+            </p>
+            
+            {% if result %}
+                <div class="result-card result-{{ result_class }}">
+                    <h3>{{ result }}</h3>
+                    <p>Predicción realizada mediante <strong>{{ model_used }}</strong></p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Side: Form -->
+        <div class="form-section">
+            
+            {% if error %}
+                <div class="error-message">
+                    <strong>Error:</strong> {{ error }}
+                </div>
+            {% endif %}
+
+            <form action="/predict" method="POST">
+                
+                <div class="form-group">
+                    <label for="model_select">Modelo Predictivo IA</label>
+                    <select id="model_select" name="model_select" required>
+                        <option value="" disabled selected>Selecciona un modelo...</option>
+                        {% for model in models %}
+                            <option value="{{ model }}" {% if model_used == model %}selected{% endif %}>{{ model }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="Glucosa_Desayuno">Glucosa en el Desayuno (mg/dL)</label>
+                    <input type="number" step="any" id="Glucosa_Desayuno" name="Glucosa_Desayuno" placeholder="Ej. 110" required 
+                           value="{{ request.form.get('Glucosa_Desayuno', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="Glucosa_Almuerzo">Glucosa en el Almuerzo (mg/dL)</label>
+                    <input type="number" step="any" id="Glucosa_Almuerzo" name="Glucosa_Almuerzo" placeholder="Ej. 135" required
+                           value="{{ request.form.get('Glucosa_Almuerzo', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="Glucosa_Cena">Glucosa en la Cena (mg/dL)</label>
+                    <input type="number" step="any" id="Glucosa_Cena" name="Glucosa_Cena" placeholder="Ej. 140" required
+                           value="{{ request.form.get('Glucosa_Cena', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="Insulina_NPH">Dosis Insulina NPH</label>
+                    <input type="number" step="any" id="Insulina_NPH" name="Insulina_NPH" placeholder="Ej. 25" required
+                           value="{{ request.form.get('Insulina_NPH', '') }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="Insulina_Regular">Dosis Insulina Regular</label>
+                    <input type="number" step="any" id="Insulina_Regular" name="Insulina_Regular" placeholder="Ej. 5" required
+                           value="{{ request.form.get('Insulina_Regular', '') }}">
+                </div>
+
+                <button type="submit" class="btn-submit">Predecir Riesgo</button>
+            </form>
+        </div>
+        
+    </div>
+
+</body>
+</html>
