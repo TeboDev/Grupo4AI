@@ -16,7 +16,7 @@ MODELS = {
     'Support Vector Machine (SVM)': os.path.join(BASE_DIR, 'Diabetes', '7. SVM', 'SVM_model_diabetes.pkl'),
     'Decision Tree': os.path.join(BASE_DIR, 'Diabetes', '4. Decision Tree', 'decision_tree_diabetes.pkl'),
     'Random Forest': os.path.join(BASE_DIR, 'Diabetes', '5. Random Forest', 'random_forest_diabetes.pkl'),
-    'Red Neuronal Artificial (RNA)': os.path.join(BASE_DIR, 'Diabetes', '8. RNA', 'RNA_model_diabetes.h5')
+    'Red Neuronal Artificial (RNA)': os.path.join(BASE_DIR, 'Diabetes', '8. RNA', 'RNA_model_diabetes.pkl')
 }
 
 # Min and Max for each feature based on original dataset to apply MinMaxScaler
@@ -65,21 +65,11 @@ def predict():
         if not model_path or not os.path.exists(model_path):
             return render_template('index.html', models=list(MODELS.keys()), error="El modelo seleccionado no se encuentra disponible.")
         
-        if model_path.endswith('.h5'):
-            try:
-                from tensorflow.keras.models import load_model
-                model = load_model(model_path)
-                # Keras models expect a batch, X_input is a DataFrame which is fine, 
-                # but predict returns an array of shape (batch, 1)
-                pred_prob = model.predict(X_input)[0][0]
-                prediction = 1 if pred_prob > 0.5 else 0
-            except ImportError:
-                return render_template('index.html', models=list(MODELS.keys()), error="TensorFlow no está instalado en el servidor. No se puede cargar el modelo de RNA.")
-        else:
-            model = joblib.load(model_path)
-            # 5. Predict
-            # For some models we might want probability, but let's stick to binary classification
-            prediction = model.predict(X_input)[0]
+        model = joblib.load(model_path)
+        
+        # 5. Predict
+        # For some models we might want probability, but let's stick to binary classification
+        prediction = model.predict(X_input)[0]
         
         result_text = "Alto Riesgo de Hipoglucemia" if prediction == 1 else "Bajo Riesgo de Hipoglucemia"
         result_class = "danger" if prediction == 1 else "success"
