@@ -27,12 +27,18 @@ SCALER_PARAMS = {
     'Insulina_NPH': {'min': 1.0, 'max': 388.0},
     'Insulina_Regular': {'min': 0.5, 'max': 115.33333333333333}
 }
+RISK_PROBABILITY_THRESHOLD = 0.45
+
 
 def scale_value(feature, value):
     min_val = SCALER_PARAMS[feature]['min']
     max_val = SCALER_PARAMS[feature]['max']
     # If the value is outside the training bounds, we just clip it or let it scale beyond 0-1
     return (value - min_val) / (max_val - min_val)
+
+
+def format_probability(probability):
+    return f"{probability * 100:.1f}%" if probability is not None else None
 
 @app.route('/', methods=['GET'])
 def index():
@@ -67,16 +73,37 @@ def predict():
         
         model = joblib.load(model_path)
         
-        # 5. Predict
-        # For some models we might want probability, but let's stick to binary classification
-        prediction = model.predict(X_input)[0]
-        
-        result_text = "Alto Riesgo de Hipoglucemia" if prediction == 1 else "Bajo Riesgo de Hipoglucemia"
-        result_class = "danger" if prediction == 1 else "success"
-        
-        return render_template('index.html', models=list(MODELS.keys()), 
-                               result=result_text, result_class=result_class, 
-                               model_used=model_name)
+        probability = None
+        prediction = None
+
+        if hasattr(model, 'predict_proba'):
+            probability = model.predict_proba(X_input)[0][1]
+            prediction = 1 if probability >= RISK_PROBABILITY_THRESHOLD else 0
+        else:
+            prediction = model.predict(X_input)[0]
+
+        if probability is not None:
+            if probability >= RISK_PROBABILITY_THRESHOLD:
+                result_text = "Alto Riesgo de Hipoglucemia"
+                result_class = "danger"
+            elif probability >= 0.35:
+                result_text = "Riesgo Moderado de Hipoglucemia"
+                result_class = "warning"
+            else:
+                result_text = "Bajo Riesgo de Hipoglucemia"
+                result_class = "success"
+            probability_text = f"Probabilidad estimada: {format_probability(probability)}"
+        else:
+            result_text = "Alto Riesgo de Hipoglucemia" if prediction == 1 else "Bajo Riesgo de Hipoglucemia"
+            result_class = "danger" if prediction == 1 else "success"
+            probability_text = None
+
+        return render_template(
+            'index.html', models=list(MODELS.keys()),
+            result=result_text, result_class=result_class,
+            probability_text=probability_text,
+            model_used=model_name
+        )
         
     except Exception as e:
         return render_template('index.html', models=list(MODELS.keys()), error=str(e))

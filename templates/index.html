@@ -195,6 +195,15 @@
             color: #fca5a5;
         }
 
+        .result-warning {
+            background: rgba(249, 115, 22, 0.1);
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+
+        .result-warning h3 {
+            color: #fdba74;
+        }
+
         .result-success {
             background: rgba(16, 185, 129, 0.1);
             border-color: rgba(16, 185, 129, 0.3);
@@ -204,6 +213,12 @@
             color: #6ee7b7;
         }
         
+        .result-meta {
+            margin-top: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
         .error-message {
             background: rgba(239, 68, 68, 0.1);
             border-left: 4px solid var(--danger-color);
@@ -242,7 +257,10 @@
             {% if result %}
                 <div class="result-card result-{{ result_class }}">
                     <h3>{{ result }}</h3>
-                    <p>Predicción realizada mediante <strong>{{ model_used }}</strong></p>
+                    {% if probability_text %}
+                        <p class="result-meta">{{ probability_text }}</p>
+                    {% endif %}
+                    <p class="result-meta">Predicción realizada mediante <strong>{{ model_used }}</strong></p>
                 </div>
             {% endif %}
         </div>
